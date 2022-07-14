@@ -6,8 +6,14 @@
 
 
 (defn powerOf [base]
-  "Returns a function which takes a number and raises the given base to that number."
-  (partial (fn [base exponent] (long (Math/pow base exponent))) base) )
+  "Returns a function which takes a number and raises the given base to that number.
+   The returned function returns the result (as a Long), unless the result exceeds
+   java.lang.Long/MAX_VALUE, in which case java.lang.Long/MAX_VALUE is returned."
+  (partial (fn [base exponent]
+             (let [ bgbase (biginteger base)  ; handle exponentiation > maximum Long
+                    bgint (.pow bgbase exponent) ]
+               (if (<= bgint Long/MAX_VALUE) (long bgint) Long/MAX_VALUE) ))
+           base) )
 
 
 (defn digitIndexer [digits]
