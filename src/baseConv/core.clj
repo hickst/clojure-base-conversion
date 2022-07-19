@@ -26,9 +26,9 @@
 (defn convertToLong [digitChars numStr]
   "Takes a sequence of digit characters and a number string in some base and
    converts the number string to a number in base 10."
-  (let [ multipliers (reverse (map (powerOf (count digitChars)) (range (count numStr))))
-         indices (map (digitIndexer digitChars) numStr) ]
-    (reduce + (map * multipliers indices)) ))
+  (let [ powersAt (reverse (map (powerOf (count digitChars)) (range (count numStr))))
+         factors (map (digitIndexer digitChars) numStr) ]
+    (reduce + (map * powersAt factors)) ))
 
 (defn convertFromBase [base]
   "Returns a function which converts a number string in the given base to an integer."
