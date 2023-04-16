@@ -5,53 +5,60 @@
 
 (def digitChars "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
 
-(defn powerOf [base]
+(defn powerOf
   "Returns a function which takes a number and raises the given base to that number.
    The returned function returns its result as a Long unless the result exceeds
    java.lang.Long/MAX_VALUE, in which case -1 is returned."
+  [base]
   (partial (fn [base exponent]
              (try                           ; catch exponentiation > Long/MAX_VALUE
                (long (Math/pow base exponent))
                (catch Exception e -1)
-             ))
+               ))
            base) )
 
-(defn digitIndexer [digitChars]
+(defn digitIndexer
   "Returns a function which takes a digit character and returns its zero-based index
    in the originally given sequence of digit characters."
+  [digitChars]
   (let [ digitIndex (zipmap digitChars (range (count digitChars))) ]
     (partial (fn [digitMap aDigit] (digitMap aDigit)) digitIndex) ))
 
 
-(defn convertToLong [digitChars numStr]
+(defn convertToLong
   "Takes a sequence of digit characters and a number string in some base and
    converts the number string to a number in base 10."
+  [digitChars numStr]
   (let [ powersAt (reverse (map (powerOf (count digitChars)) (range (count numStr))))
          factors (map (digitIndexer digitChars) numStr) ]
     (reduce + (map * powersAt factors)) ))
 
-(defn convertFromBase [base]
+(defn convertFromBase
   "Returns a function which converts a number string in the given base to an integer."
+  [base]
   (partial convertToLong (take base digitChars)) )
 
 
-(defn powers [base]
+(defn powers
   "Returns a sequence of all powers, for the given base, which
    do not exceed the maximum value of a long integer (java.lang.Long/MAX_VALUE).
    Returns nil if the provided base is not > 1."
+  [base]
   (if (> base 1)
     (take-while (comp not neg?) (map (powerOf base) (iterate inc 0)))
     nil) )
 
-(defn makeDigitString [digitIndices]
+(defn makeDigitString
   "Return a digit string from the given (possibly empty) sequence of digit indices."
+  [digitIndices]
   (str/join (map #(nth digitChars %)
                  (if (empty? digitIndices) [0] digitIndices))) )
 
 
-(defn convertFromLong [powers aNum]
+(defn convertFromLong
   "Process each power of the base in the given sequence to extract the digit for that power.
    Returns a digit string for the given number (in the base of the powers sequence)."
+  [powers aNum]
   (let [ buckets (reverse (take-while #(<= % aNum) powers)) ]
     (loop [buckets buckets, aNum aNum, digitIndices []]
       (let [ bucketValue (first buckets) ]
@@ -63,8 +70,9 @@
                    (conj digitIndices digitIndex) )))))) )
 
 
-(defn convertToBase [base]
+(defn convertToBase
   "Returns a function which converts an integer to a string representation in the given base."
+  [base]
   (partial convertFromLong (powers base)) )
 
 
